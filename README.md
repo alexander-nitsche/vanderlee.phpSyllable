@@ -162,7 +162,7 @@ Development
 Run
 ```
 composer dump-autoload --dev
-php build/update-language-files.php
+./build/update-language-files
 ```
 to fetch the latest language files remotely and optionally use environment variables to customize the update process:
 
@@ -188,7 +188,7 @@ Default: `6`.
 For example use
 ```
 composer dump-autoload --dev
-LOG_LEVEL=0 php build/update-language-files.php
+LOG_LEVEL=0 ./build/update-language-files
 ```
 to silently run the script without outputting any logging.
 
