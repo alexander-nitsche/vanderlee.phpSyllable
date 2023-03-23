@@ -32,6 +32,8 @@ jobs:
           ./build/update-language-files
 
       - name: Commit changed language files
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ -n "$(git diff --name-only -- languages)" ]; then
             languageCount=$(git diff --name-only -- languages | wc -l)
