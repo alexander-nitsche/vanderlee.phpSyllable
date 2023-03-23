@@ -41,7 +41,7 @@ jobs:
             languageNames=$(git diff --name-only -- languages | xargs basename -a | xargs)
           
             baseBranch="${{ github.ref_name }}"
-            featureBranch="task-automatic-update-of-languages-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
+            featureBranch="language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
             messageTitle="Automatic update of ${languageCount} languages"
             if [ "${languageCount}" -le 2 ]; then
               messageTitle="Automatic update of ${languageNames}"
@@ -54,8 +54,7 @@ jobs:
             git checkout -b ${featureBranch}
             git add languages
             git commit -m "${messageTitle}" -m "${messageBody}"
-            git push --set-upstream origin ${featureBranch}
           
-            gh pr create --title "${messageTitle} on $(printf '%(%d/%m/%Y at %H:%M:%S)T')" --body "${messageBody}" --base "${baseBranch}"
-            gh pr merge --auto --merge
+            gh pr create --fill --base "${baseBranch}"
+            gh pr merge --auto --rebase --delete-branch
           fi
