@@ -58,5 +58,5 @@ jobs:
             git push --set-upstream origin ${featureBranch}
           
             gh pr create --title "${messageTitle} on ${dateTime}" --body "${messageBody}" --base "${baseBranch}"
-            gh pr merge --auto
+            gh pr merge --auto --merge
           fi
