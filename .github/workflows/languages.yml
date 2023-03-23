@@ -36,7 +36,7 @@ jobs:
           if [ -n "$(git diff --name-only -- languages)" ]; then
             languageCount=$(git diff --name-only -- languages | wc -l)
             languageNames=$(git diff --name-only -- languages | xargs basename -a | xargs)
-            dateTime="${printf '%(%Y-%m-%d-%H-%M-%S)T'}"
+            dateTime=$(printf '%(%Y-%m-%d-%H-%M-%S)T')
           
             baseBranch="${{ github.ref_name }}"
             featureBranch="task-automatic-update-of-languages-${dateTime}"
