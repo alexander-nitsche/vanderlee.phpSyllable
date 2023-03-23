@@ -54,6 +54,7 @@ jobs:
             git checkout -b ${featureBranch}
             git add languages
             git commit -m "${messageTitle}" -m "${messageBody}"
+            git push --set-upstream origin ${featureBranch}
           
             gh pr create --fill --base "${baseBranch}"
             gh pr merge --auto --rebase --delete-branch
