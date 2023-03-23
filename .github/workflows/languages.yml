@@ -39,10 +39,9 @@ jobs:
           if [ -n "$(git diff --name-only -- languages)" ]; then
             languageCount=$(git diff --name-only -- languages | wc -l)
             languageNames=$(git diff --name-only -- languages | xargs basename -a | xargs)
-            dateTime=$(printf '%(%Y-%m-%d-%H-%M-%S)T')
           
             baseBranch="${{ github.ref_name }}"
-            featureBranch="task-automatic-update-of-languages-${dateTime}"
+            featureBranch="task-automatic-update-of-languages-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
             messageTitle="Automatic update of ${languageCount} languages"
             if [ "${languageCount}" -le 2 ]; then
               messageTitle="Automatic update of ${languageNames}"
@@ -57,6 +56,6 @@ jobs:
             git commit -m "${messageTitle}" -m "${messageBody}"
             git push --set-upstream origin ${featureBranch}
           
-            gh pr create --title "${messageTitle} on ${dateTime}" --body "${messageBody}" --base "${baseBranch}"
+            gh pr create --title "${messageTitle} on $(printf '%(%d/%m/%Y at %H:%M:%S)T')" --body "${messageBody}" --base "${baseBranch}"
             gh pr merge --auto --merge
           fi
