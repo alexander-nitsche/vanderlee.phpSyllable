@@ -43,9 +43,12 @@ jobs:
           if [ "$(git describe --tags --abbrev=0 ${{ github.ref_name }})" = "$(git describe --tags ${{ github.ref_name }})" ]; then
             hasTaggedBaseBranch=1
           fi
+          
+          echo "$hasChangedLanguages"
+          echo "$hasTaggedBaseBranch"
+          
           echo "HAS_CHANGED_LANGUAGES=$hasChangedLanguages" >> $GITHUB_OUTPUT
           echo "HAS_TAGGED_BASE_BRANCH=$hasTaggedBaseBranch" >> $GITHUB_OUTPUT
-          echo ${{ toJSON(GITHUB_OUTPUT) }}
 
       - name: Commit changed language files
         if: ${{ steps.download-language-files.outputs.HAS_CHANGED_LANGUAGES == 1 }}
