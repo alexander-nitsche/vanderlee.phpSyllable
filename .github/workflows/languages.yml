@@ -55,14 +55,14 @@ jobs:
           fi
           git push --set-upstream origin ${featureBranch}
           
-          echo "baseBranch=$baseBranch" >> $GITHUB_ENV
-          echo "featureBranch=$featureBranch" >> $GITHUB_ENV
+      - name: Create release - if only language file updates
+        run: |
+          ./build/create-release
+          git push
 
-      - name: Merge new commits into ${{ env.baseBranch }} branch
+      - name: Merge new commits into ${{ github.ref_name }} branch
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git checkout ${{ env.featureBranch }}
-          
-          gh pr create --fill --base ${{ env.baseBranch }}
+          gh pr create --fill --base ${{ github.ref_name }}
           gh pr merge --auto --rebase --delete-branch
