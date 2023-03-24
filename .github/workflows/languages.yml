@@ -43,8 +43,8 @@ jobs:
           languageCount=$(git diff --name-only -- languages | wc -l)
           languageNames=$(git diff --name-only -- languages | xargs basename -a | xargs)
           
-          git config user.name "Martijn van der Lee"
-          git config user.email "martijn@vanderlee.com"
+          git config --global user.name "Martijn van der Lee"
+          git config --global user.email "martijn@vanderlee.com"
         
           git checkout -b ${featureBranch}
           git add languages
@@ -59,8 +59,6 @@ jobs:
           
       - name: Create release - if only language file updates
         run: |
-          git rev-parse --abbrev-ref HEAD
-          git describe --tags --abbrev=0
           ./build/create-release
           git push
 
