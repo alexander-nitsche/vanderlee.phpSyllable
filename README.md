@@ -204,6 +204,26 @@ LOG_LEVEL=0 ./build/update-language-files
 ```
 to silently run the script without outputting any logging.
 
+### Create release
+
+Run
+```
+composer dump-autoload --dev
+./build/create-release
+```
+to create a local release of the project by adding a changelog to this README.md and applying a tag via Git. 
+Optionally, you can use environment variables to modify the release process:
+
+#### RELEASE_TYPE
+
+Set the release type to major (0), minor (1) or patch (2) release.
+Default: `2`.
+
+#### LOG_LEVEL
+
+Set the verbosity of the script to verbose (6), warnings and errors (4), errors only (3) or silent (0).
+Default: `6`.
+
 ### Tests
 
 Run
