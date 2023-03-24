@@ -2,7 +2,7 @@
 
 namespace Vanderlee\SyllableBuild;
 
-class DownloadManager
+class DownloadManager extends Manager
 {
     /**
      * @var string
@@ -15,20 +15,16 @@ class DownloadManager
     protected $maxRedirects;
 
     /**
-     * @var int
-     */
-    protected $logLevel;
-
-    /**
      * @var array
      */
     protected $configuration;
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->configurationFile = 'to-be-set';
         $this->maxRedirects = 1;
-        $this->logLevel = LOG_INFO;
     }
 
     /**
@@ -48,21 +44,13 @@ class DownloadManager
     }
 
     /**
-     * @param int $logLevel
-     */
-    public function setLogLevel($logLevel)
-    {
-        $this->logLevel = $logLevel;
-    }
-
-    /**
      * @return bool
      */
     public function download()
     {
         try {
             $configuration = $this->getConfiguration();
-        } catch (DownloadManagerException $exception) {
+        } catch (ManagerException $exception) {
             $this->error('Reading configuration has failed with:');
             $this->error($exception->getMessage());
             $this->error('Aborting.');
@@ -99,7 +87,7 @@ class DownloadManager
                     $this->info(sprintf('File %s has not changed.', $fileName));
                     $numUnchanged++;
                 }
-            } catch (DownloadManagerException $exception) {
+            } catch (ManagerException $exception) {
                 $this->warn(sprintf('Update of file %s has failed with:', $fileName));
                 $this->warn($exception->getMessage());
                 $numFailed++;
@@ -121,7 +109,7 @@ class DownloadManager
     }
 
     /**
-     * @throws DownloadManagerException
+     * @throws ManagerException
      *
      * @return array{'files': <int, array{'_comment': string, 'fromUrl': string, 'toPath': string, 'disabled': boolean}>}
      */
@@ -135,7 +123,7 @@ class DownloadManager
     }
 
     /**
-     * @throws DownloadManagerException
+     * @throws ManagerException
      *
      * @return void
      */
@@ -157,7 +145,7 @@ class DownloadManager
      * @param $filePath
      * @param $throwException
      *
-     * @throws DownloadManagerException
+     * @throws ManagerException
      *
      * @return false|string
      */
@@ -168,7 +156,7 @@ class DownloadManager
         if ($fileContent === false && $throwException) {
             $error = error_get_last();
 
-            throw new DownloadManagerException(sprintf(
+            throw new ManagerException(sprintf(
                 "Reading from path %s failed with\n%s",
                 $filePath,
                 json_encode([
@@ -203,7 +191,7 @@ class DownloadManager
      * @param $filePath
      * @param $fileContent
      *
-     * @throws DownloadManagerException
+     * @throws ManagerException
      *
      * @return void
      */
@@ -214,7 +202,7 @@ class DownloadManager
         if ($result === false) {
             $error = error_get_last();
 
-            throw new DownloadManagerException(sprintf(
+            throw new ManagerException(sprintf(
                 "Writing to path %s failed with\n%s",
                 $filePath,
                 json_encode([
@@ -227,7 +215,7 @@ class DownloadManager
     /**
      * @param $fileUrl
      *
-     * @throws DownloadManagerException
+     * @throws ManagerException
      *
      * @return string
      */
@@ -243,7 +231,7 @@ class DownloadManager
         $fileContent = curl_exec($curl);
 
         if ($fileContent === false) {
-            throw new DownloadManagerException(sprintf(
+            throw new ManagerException(sprintf(
                 "Call to URL %s failed with\n%s",
                 $fileUrl,
                 json_encode([
@@ -256,7 +244,7 @@ class DownloadManager
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         if ($fileContent === '' || $status < 200 || $status >= 300) {
-            throw new DownloadManagerException(sprintf(
+            throw new ManagerException(sprintf(
                 "Call to URL %s failed with\n%s",
                 $fileUrl,
                 json_encode([
@@ -269,27 +257,5 @@ class DownloadManager
         curl_close($curl);
 
         return $fileContent;
-    }
-
-    protected function info($text)
-    {
-        $this->log($text, LOG_INFO);
-    }
-
-    protected function warn($text)
-    {
-        $this->log($text, LOG_WARNING);
-    }
-
-    protected function error($text)
-    {
-        $this->log($text, LOG_ERR);
-    }
-
-    protected function log($text, $logLevel)
-    {
-        if ($logLevel <= $this->logLevel) {
-            echo "${text}\n";
-        }
     }
 }
