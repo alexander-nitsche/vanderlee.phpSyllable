@@ -30,13 +30,16 @@ jobs:
           extensions: 'curl'
 
       - name: Download latest language files
-        id: download-language-files
         run: |
           composer dump-autoload --dev
           ./build/update-language-files
-          
+
+      - name: Create context
+        id: context
+        run: |
           hasChangedLanguages=0
           hasTaggedBaseBranch=0
+          
           if [ -n "$(git diff --name-only -- languages)" ]; then
             hasChangedLanguages=1
           fi
@@ -44,14 +47,11 @@ jobs:
             hasTaggedBaseBranch=1
           fi
           
-          echo "$hasChangedLanguages"
-          echo "$hasTaggedBaseBranch"
-          
           echo "HAS_CHANGED_LANGUAGES=$hasChangedLanguages" >> $GITHUB_OUTPUT
           echo "HAS_TAGGED_BASE_BRANCH=$hasTaggedBaseBranch" >> $GITHUB_OUTPUT
 
       - name: Commit changed language files
-        if: ${{ steps.download-language-files.outputs.HAS_CHANGED_LANGUAGES == 1 }}
+        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 }}
         run: |
           baseBranch="${{ github.ref_name }}"
           featureBranch="language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
@@ -72,14 +72,14 @@ jobs:
           fi
           git push --set-upstream origin ${featureBranch}
           
-      - name: Create release - if only language file updates since last release
-        if: ${{ steps.download-language-files.outputs.HAS_TAGGED_BASE_BRANCH == 1 }}
+      - name: Create release (if only language files have been updated since the last release)
+        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 && steps.context.outputs.HAS_TAGGED_BASE_BRANCH == 1 }}
         run: |
           ./build/create-release
           git push
 
       - name: Merge new commits into ${{ github.ref_name }} branch
-        if: ${{ steps.download-language-files.outputs.HAS_CHANGED_LANGUAGES == 1 }}
+        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
