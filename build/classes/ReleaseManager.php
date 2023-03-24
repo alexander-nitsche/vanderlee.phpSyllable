@@ -34,13 +34,15 @@ class ReleaseManager extends Manager
             $gitDiff = $this->exec('git diff --name-only');
 
             if (!empty($gitDiff)) {
-                $this->error('The projectt has uncommitted changes.');
+                $this->error('The project has uncommitted changes.');
                 $this->error('Aborting.');
 
                 return false;
             }
 
             $branch = $this->exec('git rev-parse --abbrev-ref HEAD');
+            // debug
+            $this->info($branch);
             $tag = $this->exec('git describe --tags --abbrev=0');
             $tagLong = $this->exec('git describe --tags');
 
