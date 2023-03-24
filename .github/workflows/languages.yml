@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          # Include tags.
+          fetch-depth: 0
 
       - name: Setup PHP 7.4
         uses: shivammathur/setup-php@v2
@@ -26,35 +29,45 @@ jobs:
           php-version: '7.4'
           extensions: 'curl'
 
-      - name: Download latest language files
+      - name: Prepare environment
         run: |
+          git config --global user.name "Martijn van der Lee"
+          git config --global user.email "martijn@vanderlee.com"
+          
           composer dump-autoload --dev
-          ./build/update-language-files
 
-      - name: Commit changed language files
+      - name: Checkout new feature branch
+        run: |
+          git checkout -b "language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
+
+      - name: Commit updated language files
+        id: update-language-files
+        run: |
+          baseBranch="${{ github.ref_name }}"
+          
+          WITH_COMMIT=1 ./build/update-language-files
+          
+          echo "CHANGED_LANGUAGES=$(git rev-list ${baseBranch}..HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Commit patch release (if base branch was released too)
+        if: ${{ steps.update-language-files.outputs.CHANGED_LANGUAGES }}
+        run: |
+          baseBranch="${{ github.ref_name }}"
+          baseBranchTag="$(git describe --tags --abbrev=0 ${baseBranch})"
+          baseBranchTagLong="$(git describe --tags ${baseBranch})"
+          
+          if [ "${baseBranchTag}" = "${baseBranchTagLong}" ]; then
+            WITH_COMMIT=1 ./build/create-release
+          fi
+
+      - name: Merge feature branch into base branch
+        if: ${{ steps.update-language-files.outputs.CHANGED_LANGUAGES }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          [ -z "$(git diff --name-only -- languages)" ] && exit 0
-          
           baseBranch="${{ github.ref_name }}"
-          featureBranch="language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
-          languageCount=$(git diff --name-only -- languages | wc -l)
-          languageNames=$(git diff --name-only -- languages | xargs basename -a | xargs)
+          featureBranch="$(git rev-parse --abbrev-ref HEAD)"
           
-          git config user.name "Martijn van der Lee"
-          git config user.email "martijn@vanderlee.com"
-        
-          git checkout -b ${featureBranch}
-          git add languages
-          if [ "${languageCount}" -le 2 ]; then
-            git commit -m "Automatic update of ${languageNames}" \
-                        -m "Updated via .github/workflows/languages.yml:jobs.update."
-          else
-            git commit -m "Automatic update of ${languageCount} languages" \
-                        -m "Updated via .github/workflows/languages.yml:jobs.update."
-          fi
           git push --set-upstream origin ${featureBranch}
-        
           gh pr create --fill --base ${baseBranch}
           gh pr merge --auto --rebase --delete-branch
