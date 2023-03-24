@@ -30,14 +30,26 @@ jobs:
           extensions: 'curl'
 
       - name: Download latest language files
+        id: download-language-files
         run: |
           composer dump-autoload --dev
           ./build/update-language-files
+          
+          hasChangedLanguages=0
+          hasTaggedBaseBranch=0
+          if [ -n "$(git diff --name-only -- languages)" ]; then
+            hasChangedLanguages=1
+          fi
+          if [ "$(git describe --tags --abbrev=0 ${{ github.ref_name }})" = "$(git describe --tags ${{ github.ref_name }})" ]; then
+            hasTaggedBaseBranch=1
+          fi
+          echo "HAS_CHANGED_LANGUAGES=$hasChangedLanguages" >> $GITHUB_OUTPUT
+          echo "HAS_TAGGED_BASE_BRANCH=$hasTaggedBaseBranch" >> $GITHUB_OUTPUT
+          echo ${{ toJSON(GITHUB_OUTPUT) }}
 
       - name: Commit changed language files
+        if: ${{ steps.download-language-files.outputs.HAS_CHANGED_LANGUAGES == 1 }}
         run: |
-          [ -z "$(git diff --name-only -- languages)" ] && exit 0
-          
           baseBranch="${{ github.ref_name }}"
           featureBranch="language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
           languageCount=$(git diff --name-only -- languages | wc -l)
@@ -58,19 +70,13 @@ jobs:
           git push --set-upstream origin ${featureBranch}
           
       - name: Create release - if only language file updates since last release
+        if: ${{ steps.download-language-files.outputs.HAS_TAGGED_BASE_BRANCH == 1 }}
         run: |
-          tag=$(git describe --tags --abbrev=0 ${{ github.ref_name }})
-          tagLong=$(git describe --tags ${{ github.ref_name }})
-          
-          echo "$tag"
-          echo "$tagLong"
-          
-          [ "$tag" -ne "tagLong" ] && exit 0
-          
           ./build/create-release
           git push
 
       - name: Merge new commits into ${{ github.ref_name }} branch
+        if: ${{ steps.download-language-files.outputs.HAS_CHANGED_LANGUAGES == 1 }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
