@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP 7.4
         uses: shivammathur/setup-php@v2
@@ -31,17 +33,32 @@ jobs:
           composer dump-autoload --dev
           ./build/update-language-files
 
-      - name: Commit changed language files
+      - name: Create context
+        id: context
         run: |
-          [ -z "$(git diff --name-only -- languages)" ] && exit 0
+          hasChangedLanguages=0
+          hasTaggedBaseBranch=0
           
+          if [ -n "$(git diff --name-only -- languages)" ]; then
+            hasChangedLanguages=1
+          fi
+          if [ "$(git describe --tags --abbrev=0 ${{ github.ref_name }})" = "$(git describe --tags ${{ github.ref_name }})" ]; then
+            hasTaggedBaseBranch=1
+          fi
+          
+          echo "HAS_CHANGED_LANGUAGES=$hasChangedLanguages" >> $GITHUB_OUTPUT
+          echo "HAS_TAGGED_BASE_BRANCH=$hasTaggedBaseBranch" >> $GITHUB_OUTPUT
+
+      - name: Commit changed language files
+        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 }}
+        run: |
           baseBranch="${{ github.ref_name }}"
           featureBranch="language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
           languageCount=$(git diff --name-only -- languages | wc -l)
           languageNames=$(git diff --name-only -- languages | xargs basename -a | xargs)
           
-          git config user.name "Martijn van der Lee"
-          git config user.email "martijn@vanderlee.com"
+          git config --global user.name "Martijn van der Lee"
+          git config --global user.email "martijn@vanderlee.com"
         
           git checkout -b ${featureBranch}
           git add languages
@@ -54,14 +71,16 @@ jobs:
           fi
           git push --set-upstream origin ${featureBranch}
           
-          echo "baseBranch=$baseBranch" >> $GITHUB_ENV
-          echo "featureBranch=$featureBranch" >> $GITHUB_ENV
+      - name: Commit new release (if only updated language files since last release)
+        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 && steps.context.outputs.HAS_TAGGED_BASE_BRANCH == 1 }}
+        run: |
+          ./build/create-release
+          git push
 
-      - name: Merge new commits into ${{ env.baseBranch }} branch
+      - name: Merge new commits into base branch
+        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git checkout -b ${{ env.featureBranch }}
-          
-          gh pr create --fill --base ${{ env.baseBranch }}
+          gh pr create --fill --base ${{ github.ref_name }}
           gh pr merge --auto --rebase --delete-branch
