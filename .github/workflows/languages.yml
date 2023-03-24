@@ -62,7 +62,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git checkout -b ${{ env.featureBranch }}
+          git checkout ${{ env.featureBranch }}
           
           gh pr create --fill --base ${{ env.baseBranch }}
           gh pr merge --auto --rebase --delete-branch
