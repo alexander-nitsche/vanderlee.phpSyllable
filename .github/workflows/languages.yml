@@ -72,13 +72,13 @@ jobs:
           fi
           git push --set-upstream origin ${featureBranch}
           
-      - name: Create release (if only language files have been updated since the last release)
+      - name: Commit new release (if only updated language files since last release)
         if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 && steps.context.outputs.HAS_TAGGED_BASE_BRANCH == 1 }}
         run: |
           ./build/create-release
           git push
 
-      - name: Merge new commits into ${{ github.ref_name }} branch
+      - name: Merge new commits into base branch
         if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
