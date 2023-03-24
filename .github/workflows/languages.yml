@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-#      contents: write
+      contents: write
       pull-requests: write
 
     steps:
@@ -34,7 +34,7 @@ jobs:
 
       - name: Commit changed language files
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           if [ -n "$(git diff --name-only -- languages)" ]; then
             languageCount=$(git diff --name-only -- languages | wc -l)
