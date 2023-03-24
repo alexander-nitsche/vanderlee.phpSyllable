@@ -34,7 +34,7 @@ class ReleaseManager extends Manager
             $gitDiff = $this->exec('git diff --name-only');
 
             if (!empty($gitDiff)) {
-                $this->error('The project has uncommitted changes.');
+                $this->error('The projectt has uncommitted changes.');
                 $this->error('Aborting.');
 
                 return false;
