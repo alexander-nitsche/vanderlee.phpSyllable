@@ -32,8 +32,6 @@ jobs:
           ./build/update-language-files
 
       - name: Commit changed language files
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
           [ -z "$(git diff --name-only -- languages)" ] && exit 0
           
@@ -55,6 +53,15 @@ jobs:
                         -m "Updated via .github/workflows/languages.yml:jobs.update."
           fi
           git push --set-upstream origin ${featureBranch}
-        
-          gh pr create --fill --base ${baseBranch}
+          
+          echo "baseBranch=$baseBranch" >> $GITHUB_ENV
+          echo "featureBranch=$featureBranch" >> $GITHUB_ENV
+
+      - name: Merge new commits into ${{ env.baseBranch }} branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git checkout -b ${{ env.featureBranch }}
+          
+          gh pr create --fill --base ${{ env.baseBranch }}
           gh pr merge --auto --rebase --delete-branch
