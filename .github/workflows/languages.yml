@@ -43,8 +43,8 @@ jobs:
           languageCount=$(git diff --name-only -- languages | wc -l)
           languageNames=$(git diff --name-only -- languages | xargs basename -a | xargs)
           
-          git config user.name "Martijn van der Lee"
-          git config user.email "martijn@vanderlee.com"
+          git config --global user.name "Martijn van der Lee"
+          git config --global user.email "martijn@vanderlee.com"
         
           git checkout -b ${featureBranch}
           git add languages
@@ -57,13 +57,17 @@ jobs:
           fi
           git push --set-upstream origin ${featureBranch}
           
-      - name: Create release - if only language file updates
+      - name: Create release - if only language file updates since last release
         run: |
-          git config user.name "Martijn van der Lee"
-          git config user.email "martijn@vanderlee.com"
+          tag=$(git describe --tags --abbrev=0 ${{ github.ref_name }})
+          tagLong=$(git describe --tags ${{ github.ref_name }})
+          
+          echo "$tag"
+          echo "$tagLong"
+          
+          [ "$tag" -ne "tagLong" ] && exit 0
           
           ./build/create-release
-          
           git push
 
       - name: Merge new commits into ${{ github.ref_name }} branch
