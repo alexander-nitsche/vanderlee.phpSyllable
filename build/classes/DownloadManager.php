@@ -29,6 +29,8 @@ class DownloadManager extends Manager
 
     protected $numFailed;
 
+    protected $filesChanged;
+
     public function __construct()
     {
         parent::__construct();
@@ -61,6 +63,7 @@ class DownloadManager extends Manager
         try {
             $this->readConfiguration();
             $this->download();
+            $this->createCommitOnChangedFiles();
         } catch (ManagerException $exception) {
             $this->error($exception->getMessage());
             $this->error('Aborting.');
@@ -105,6 +108,7 @@ class DownloadManager extends Manager
         $numChanged = 0;
         $numUnchanged = 0;
         $numFailed = 0;
+        $filesChanged = [];
 
         $this->info(sprintf(
             'Updating %s files on %s.',
@@ -124,6 +128,7 @@ class DownloadManager extends Manager
                     $this->writeLocalFile($filePath, $remoteFileContent);
                     $this->info(sprintf('File %s has CHANGED.', $fileName));
                     $numChanged++;
+                    $filesChanged[] = $filePath;
                 } else {
                     $this->info(sprintf('File %s has not changed.', $fileName));
                     $numUnchanged++;
@@ -151,6 +156,7 @@ class DownloadManager extends Manager
         $this->numChanged = $numChanged;
         $this->numUnchanged = $numUnchanged;
         $this->numFailed = $numFailed;
+        $this->filesChanged = $filesChanged;
     }
 
     /**
@@ -269,5 +275,20 @@ class DownloadManager extends Manager
         curl_close($curl);
 
         return $fileContent;
+    }
+
+    protected function createCommitOnChangedFiles()
+    {
+        if ($this->numChanged === 0) {
+            return;
+        }
+
+        $message = sprintf('Automatic update of %s files', $this->numChanged);
+        if ($this->numChanged === 1) {
+            $message = sprintf('Automatic update of %s', basename($this->filesChanged[0]));
+        }
+
+        $this->exec(sprintf('git add %s', implode(' ', $this->filesChanged)));
+        $this->exec(sprintf('git commit -m "%s"', $message));
     }
 }

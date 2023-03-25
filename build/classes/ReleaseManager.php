@@ -220,7 +220,7 @@ class ReleaseManager extends Manager
      */
     protected function createCommit()
     {
-        $this->exec('git add -u');
+        $this->exec('git add .');
         $this->exec(sprintf('git commit -m "Release %s"', $this->releaseTag));
         $this->exec(sprintf('git tag %s', $this->releaseTag));
     }
