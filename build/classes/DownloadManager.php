@@ -71,7 +71,9 @@ class DownloadManager extends Manager
             return false;
         }
 
-        return $this->numFailed === 0;
+        // Temporarily disable check due to manifold SSL problems on the mirrors.
+//        return $this->numFailed === 0;
+        return true;
     }
 
     /**
