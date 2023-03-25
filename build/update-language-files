@@ -17,7 +17,7 @@ $downloadManager = new DownloadManager();
 $downloadManager->setConfigurationFile($configurationFile);
 $downloadManager->setMaxRedirects($maxRedirects);
 $downloadManager->setLogLevel($logLevel);
-$result = $downloadManager->download();
+$result = $downloadManager->work();
 
 if ($result === false) {
     exit(1);

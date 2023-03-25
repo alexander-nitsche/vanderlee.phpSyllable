@@ -15,9 +15,19 @@ class DownloadManager extends Manager
     protected $maxRedirects;
 
     /**
-     * @var array
+     * @var array{'files': <int, array{'_comment': string, 'fromUrl': string, 'toPath': string, 'disabled': boolean}>}
      */
     protected $configuration;
+
+    protected $numProcessed;
+
+    protected $numTotal;
+
+    protected $numChanged;
+
+    protected $numUnchanged;
+
+    protected $numFailed;
 
     public function __construct()
     {
@@ -46,19 +56,50 @@ class DownloadManager extends Manager
     /**
      * @return bool
      */
-    public function download()
+    public function work()
     {
         try {
-            $configuration = $this->getConfiguration();
+            $this->readConfiguration();
+            $this->download();
         } catch (ManagerException $exception) {
-            $this->error('Reading configuration has failed with:');
             $this->error($exception->getMessage());
             $this->error('Aborting.');
 
             return false;
         }
 
-        $files = $configuration['files'];
+        return $this->numFailed === 0;
+    }
+
+    /**
+     * @throws ManagerException
+     *
+     * @return void
+     */
+    protected function readConfiguration()
+    {
+        try {
+            $configurationContent = $this->readLocalFile($this->configurationFile, true);
+            $configurationDir = dirname($this->configurationFile);
+            $configuration = json_decode($configurationContent, true);
+            $configuration['files'] = array_filter($configuration['files'], function ($file) {
+                return !(isset($file['disabled']) && $file['disabled']);
+            });
+            foreach ($configuration['files'] as &$file) {
+                $file['toPath'] = $this->getAbsoluteFilePath($configurationDir, $file['toPath']);
+            }
+            $this->configuration = $configuration;
+        } catch (ManagerException $exception) {
+            throw new ManagerException(sprintf(
+                "Reading configuration has failed with:\n%s",
+                $exception->getMessage()
+            ));
+        }
+    }
+
+    protected function download()
+    {
+        $files = $this->configuration['files'];
 
         $numTotal = count($files);
         $numChanged = 0;
@@ -105,40 +146,11 @@ class DownloadManager extends Manager
             $numFailed
         ));
 
-        return $numFailed === 0;
-    }
-
-    /**
-     * @throws ManagerException
-     *
-     * @return array{'files': <int, array{'_comment': string, 'fromUrl': string, 'toPath': string, 'disabled': boolean}>}
-     */
-    protected function getConfiguration()
-    {
-        if (empty($this->configuration)) {
-            $this->readConfiguration();
-        }
-
-        return $this->configuration;
-    }
-
-    /**
-     * @throws ManagerException
-     *
-     * @return void
-     */
-    protected function readConfiguration()
-    {
-        $configurationContent = $this->readLocalFile($this->configurationFile, true);
-        $configurationDir = dirname($this->configurationFile);
-        $configuration = json_decode($configurationContent, true);
-        $configuration['files'] = array_filter($configuration['files'], function ($file) {
-            return !(isset($file['disabled']) && $file['disabled']);
-        });
-        foreach ($configuration['files'] as &$file) {
-            $file['toPath'] = $this->getAbsoluteFilePath($configurationDir, $file['toPath']);
-        }
-        $this->configuration = $configuration;
+        $this->numProcessed = $numProcessed;
+        $this->numTotal = $numTotal;
+        $this->numChanged = $numChanged;
+        $this->numUnchanged = $numUnchanged;
+        $this->numFailed = $numFailed;
     }
 
     /**

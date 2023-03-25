@@ -14,7 +14,7 @@ $logLevel = $logLevel !== false ? (int) $logLevel : LOG_INFO;
 $releaseManager = new ReleaseManager();
 $releaseManager->setReleaseType($releaseType);
 $releaseManager->setLogLevel($logLevel);
-$result = $releaseManager->release();
+$result = $releaseManager->work();
 
 if ($result === false) {
     exit(1);
