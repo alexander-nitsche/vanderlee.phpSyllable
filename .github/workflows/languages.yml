@@ -29,46 +29,44 @@ jobs:
           php-version: '7.4'
           extensions: 'curl'
 
-      - name: Download & commit latest language files
+      - name: Prepare environment
         run: |
-          featureBranch="language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
-          
           git config --global user.name "Martijn van der Lee"
           git config --global user.email "martijn@vanderlee.com"
           
-          git checkout -b ${featureBranch}
-
           composer dump-autoload --dev
+
+      - name: Checkout new feature branch
+        run: |
+          git checkout -b "language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
+
+      - name: Commit updated language files
+        run: |
+          baseBranch="${{ github.ref_name }}"
+          
           ./build/update-language-files
-
-          git push --set-upstream origin ${featureBranch}
-
-      - name: Create context
-        id: context
-        run: |
-          hasChangedLanguages=0
-          hasTaggedBaseBranch=0
           
-          if [ "$(git rev-list --count ${{ github.ref_name }}..HEAD)" -eq 1 ]; then
-            hasChangedLanguages=1
-          fi
-          if [ "$(git describe --tags --abbrev=0 ${{ github.ref_name }})" = "$(git describe --tags ${{ github.ref_name }})" ]; then
-            hasTaggedBaseBranch=1
-          fi
-          
-          echo "HAS_CHANGED_LANGUAGES=$hasChangedLanguages" >> $GITHUB_OUTPUT
-          echo "HAS_TAGGED_BASE_BRANCH=$hasTaggedBaseBranch" >> $GITHUB_OUTPUT
+          echo "CHANGED_LANGUAGES=$(git rev-list ${baseBranch}..HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Create & commit patch release (if head of base branch was released already)
-        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 && steps.context.outputs.HAS_TAGGED_BASE_BRANCH == 1 }}
+      - name: Commit patch release (if base branch was released too)
+        if: ${{ steps.context.outputs.CHANGED_LANGUAGES }}
         run: |
-          ./build/create-release
-          git push
+          baseBranch="${{ github.ref_name }}"
+          baseBranchTag="$(git describe --tags --abbrev=0 ${baseBranch})"
+          baseBranchTagLong="$(git describe --tags ${baseBranch})"
+          
+          if [ "${baseBranchTag}" = "${baseBranchTagLong}" ]; then
+            ./build/create-release
+          fi
 
-      - name: Merge new commits into base branch
-        if: ${{ steps.context.outputs.HAS_CHANGED_LANGUAGES == 1 }}
+      - name: Merge feature branch into base branch
+        if: ${{ steps.context.outputs.CHANGED_LANGUAGES }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh pr create --fill --base ${{ github.ref_name }}
+          baseBranch="${{ github.ref_name }}"
+          featureBranch="$(git rev-parse --abbrev-ref HEAD)"
+          
+          git push --set-upstream origin ${featureBranch}
+          gh pr create --fill --base ${baseBranch}
           gh pr merge --auto --rebase --delete-branch
