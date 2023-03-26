@@ -1,6 +1,6 @@
 Syllable
 ========
-Version 1.5.3
+Version 1.5.4
 
 [![Tests](https://github.com/vanderlee/phpSyllable/actions/workflows/tests.yml/badge.svg)](https://github.com/vanderlee/phpSyllable/actions/workflows/tests.yml)
 
@@ -246,6 +246,38 @@ to execute the tests.
 
 Changes
 -------
+1.5.4
+-   Automatic update of 66 languages
+-   Add temporary adaptions for tests
+-   Automatically create a release on language update
+-   Convert README.md from CRLF to LF
+-   Use automatic PSR-4 class loading from Composer for tests
+-   Satisfy StyleCI and Codacy
+-   Create and automatically merge PR on language update
+-   Remove outdated Codacy code quality handling
+-   Replace automatic test execution by Travis CI with GitHub Actions
+-   Exclude unimportant files from composer package distribution
+-   Add language files update GitHub Action
+-   Allow download of new language files
+-   Disable download of hyph-de.tex
+-   Use explicit file download via configuration file
+-   Make update script a shell script
+-   Customize the language files update run via CLI parameters
+-   Support logging levels in language files update script
+-   Return command exit code 1 if language file updates have failed
+-   Prevent language file update if the new file is empty
+-   Smooth handling of cURL errors when updating language files
+-   Add development section to README.md
+-   Satisfy StyleCI
+-   Move update script to common "build" folder
+-   Add language files update script
+-   Fix small typo in README and add 'use' in example.
+-   Use same code format as in src/Source/File.php
+-   Fix opening brace
+-   Remove whitespace
+-   Fix closing brace
+-   Use PHP syntax highlighting
+
 1.5.3
 -   Fixed PHP 7.4 compatibility (#37) by @Dargmuesli.
 
