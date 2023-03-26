@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use Vanderlee\SyllableBuild\DownloadManager;
+use Vanderlee\SyllableBuild\LanguagesDownloadManager;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
@@ -13,11 +13,11 @@ $configurationFile = $configurationFile !== false ? $configurationFile : __DIR__
 $maxRedirects = $maxRedirects !== false ? (int) $maxRedirects : 1;
 $logLevel = $logLevel !== false ? (int) $logLevel : LOG_INFO;
 
-$downloadManager = new DownloadManager();
+$downloadManager = new LanguagesDownloadManager();
 $downloadManager->setConfigurationFile($configurationFile);
 $downloadManager->setMaxRedirects($maxRedirects);
 $downloadManager->setLogLevel($logLevel);
-$result = $downloadManager->work();
+$result = $downloadManager->delegate();
 
 if ($result === false) {
     exit(1);

@@ -36,7 +36,7 @@ class ReleaseManager extends Manager
     /**
      * @return bool
      */
-    public function work()
+    public function delegate()
     {
         try {
             $this->getContext();

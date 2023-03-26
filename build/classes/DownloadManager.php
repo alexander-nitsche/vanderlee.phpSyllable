@@ -58,12 +58,12 @@ class DownloadManager extends Manager
     /**
      * @return bool
      */
-    public function work()
+    public function delegate()
     {
         try {
             $this->readConfiguration();
             $this->download();
-            $this->createCommitIfChangedFiles();
+            $this->createCommitIfFilesChanged();
         } catch (ManagerException $exception) {
             $this->error($exception->getMessage());
             $this->error('Aborting.');
@@ -279,7 +279,7 @@ class DownloadManager extends Manager
         return $fileContent;
     }
 
-    protected function createCommitIfChangedFiles()
+    protected function createCommitIfFilesChanged()
     {
         if ($this->numChanged === 0) {
             return;
