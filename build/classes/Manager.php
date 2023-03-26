@@ -93,10 +93,50 @@ abstract class Manager
     /**
      * @throws ManagerException
      *
+     * @return bool
+     */
+    protected function isBranchHeadTagged()
+    {
+        return $this->getTag() === $this->getTagLong();
+    }
+
+    /**
+     * @throws ManagerException
+     *
      * @return array|string
      */
     protected function getChangedFiles()
     {
         return $this->exec('git diff --name-only', true);
+    }
+
+    /**
+     * @throws ManagerException
+     *
+     * @return string
+     */
+    protected function getBranch()
+    {
+        return $this->exec('git rev-parse --abbrev-ref HEAD');
+    }
+
+    /**
+     * @throws ManagerException
+     *
+     * @return string
+     */
+    protected function getTag()
+    {
+        return $this->exec('git describe --tags --abbrev=0');
+    }
+
+    /**
+     * @throws ManagerException
+     *
+     * @return string
+     */
+    protected function getTagLong()
+    {
+        return $this->exec('git describe --tags');
     }
 }

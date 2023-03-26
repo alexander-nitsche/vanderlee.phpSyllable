@@ -319,7 +319,7 @@ class DownloadManager extends Manager
             $message = sprintf('Automatic update of %s', basename($this->filesChanged[0]));
         }
 
-        $this->exec(sprintf('git add %s', implode(' ', $this->filesChanged)));
+        $this->exec('git add .');
         $this->exec(sprintf('git commit -m "%s"', $message));
     }
 }

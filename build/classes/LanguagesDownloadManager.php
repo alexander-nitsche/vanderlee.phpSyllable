@@ -18,7 +18,7 @@ class LanguagesDownloadManager extends DownloadManager
             );
         }
 
-        $this->exec(sprintf('git add %s', implode(' ', $this->filesChanged)));
+        $this->exec('git add .');
         $this->exec(sprintf('git commit -m "%s"', $message));
     }
 }

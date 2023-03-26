@@ -22,8 +22,6 @@ class ReleaseManager extends Manager
 
     protected $tag;
 
-    protected $tagLong;
-
     protected $releaseTag;
 
     public function __construct()
@@ -59,10 +57,8 @@ class ReleaseManager extends Manager
             $this->getContext();
             $this->checkPrerequisites();
             $this->info(sprintf('Create release %s.', $this->releaseTag));
-            $this->info('Update README.md.');
             $this->updateReadme();
             $this->checkPostConditions();
-            $this->info('Create release commit.');
             $this->createCommit();
         } catch (ManagerException $exception) {
             $this->error($exception->getMessage());
@@ -83,38 +79,7 @@ class ReleaseManager extends Manager
     {
         $this->branch = $this->getBranch();
         $this->tag = $this->getTag();
-        $this->tagLong = $this->getTagLong();
         $this->releaseTag = $this->createReleaseTag();
-    }
-
-    /**
-     * @throws ManagerException
-     *
-     * @return string
-     */
-    protected function getBranch()
-    {
-        return $this->exec('git rev-parse --abbrev-ref HEAD');
-    }
-
-    /**
-     * @throws ManagerException
-     *
-     * @return string
-     */
-    protected function getTag()
-    {
-        return $this->exec('git describe --tags --abbrev=0');
-    }
-
-    /**
-     * @throws ManagerException
-     *
-     * @return string
-     */
-    protected function getTagLong()
-    {
-        return $this->exec('git describe --tags');
     }
 
     /**
@@ -145,21 +110,13 @@ class ReleaseManager extends Manager
             );
         }
 
-        if ($this->isBranchTagged()) {
+        if ($this->isBranchHeadTagged()) {
             throw new ManagerException(sprintf(
                 'Current %s branch is already tagged (%s).',
                 $this->branch,
                 $this->tag
             ));
         }
-    }
-
-    /**
-     * @return bool
-     */
-    protected function isBranchTagged()
-    {
-        return $this->tag === $this->tagLong;
     }
 
     /**
