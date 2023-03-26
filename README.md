@@ -1,6 +1,6 @@
 Syllable
 ========
-Version 1.5.4
+Version 1.5.5
 
 [![Tests](https://github.com/vanderlee/phpSyllable/actions/workflows/tests.yml/badge.svg)](https://github.com/vanderlee/phpSyllable/actions/workflows/tests.yml)
 
@@ -246,6 +246,9 @@ to execute the tests.
 
 Changes
 -------
+1.5.5
+-   Automatic update of hyph-af.tex
+
 1.5.4
 -   Add temporary adaptions for tests.
 
