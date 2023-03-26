@@ -77,4 +77,26 @@ abstract class Manager
 
         return $result;
     }
+
+    /**
+     * @throws ManagerException
+     *
+     * @return bool
+     */
+    protected function hasCleanWorkingTree()
+    {
+        $changedFiles = $this->getChangedFiles();
+
+        return empty($changedFiles);
+    }
+
+    /**
+     * @throws ManagerException
+     *
+     * @return array|string
+     */
+    protected function getChangedFiles()
+    {
+        return $this->exec('git diff --name-only', true);
+    }
 }

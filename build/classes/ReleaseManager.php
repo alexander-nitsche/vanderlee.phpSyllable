@@ -139,7 +139,7 @@ class ReleaseManager extends Manager
      */
     protected function checkPrerequisites()
     {
-        if (!$this->hasCleanWorkingTree()) {
+        if ($this->withCommit && !$this->hasCleanWorkingTree()) {
             throw new ManagerException(
                 'The project has uncommitted changes.'
             );
@@ -152,28 +152,6 @@ class ReleaseManager extends Manager
                 $this->tag
             ));
         }
-    }
-
-    /**
-     * @throws ManagerException
-     *
-     * @return bool
-     */
-    protected function hasCleanWorkingTree()
-    {
-        $changedFiles = $this->getChangedFiles();
-
-        return empty($changedFiles);
-    }
-
-    /**
-     * @throws ManagerException
-     *
-     * @return array|string
-     */
-    protected function getChangedFiles()
-    {
-        return $this->exec('git diff --name-only', true);
     }
 
     /**

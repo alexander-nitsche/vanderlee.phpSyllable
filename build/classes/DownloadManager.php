@@ -75,6 +75,7 @@ class DownloadManager extends Manager
     public function delegate()
     {
         try {
+            $this->checkPrerequisites();
             $this->readConfiguration();
             $this->download();
             $this->createCommitIfFilesChanged();
@@ -88,6 +89,20 @@ class DownloadManager extends Manager
         // Temporarily disable check due to manifold SSL problems on the mirrors.
 //        return $this->numFailed === 0;
         return true;
+    }
+
+    /**
+     * @throws ManagerException
+     *
+     * @return void
+     */
+    protected function checkPrerequisites()
+    {
+        if ($this->withCommit && !$this->hasCleanWorkingTree()) {
+            throw new ManagerException(
+                'The project has uncommitted changes.'
+            );
+        }
     }
 
     /**
