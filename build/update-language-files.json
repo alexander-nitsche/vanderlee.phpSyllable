@@ -3,7 +3,17 @@
         {
             "_comment": "new language file",
             "fromUrl": "http://mirror.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-af.tex",
-            "toPath": "../languages/hyph-argl.tex"
+            "toPath": "../languages/hyph-argl1.tex"
+        },
+        {
+            "_comment": "new language file 2",
+            "fromUrl": "http://mirror.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-af.tex",
+            "toPath": "../languages/hyph-argl2.tex"
+        },
+        {
+            "_comment": "new language file 3",
+            "fromUrl": "http://mirror.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-af.tex",
+            "toPath": "../languages/hyph-argl3.tex"
         }
     ]
 }
