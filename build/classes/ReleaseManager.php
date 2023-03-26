@@ -112,7 +112,7 @@ class ReleaseManager extends Manager
 
         if ($this->isBranchHeadTagged()) {
             throw new ManagerException(sprintf(
-                'Current %s branch is already tagged (%s).',
+                'Current branch (%s) is already tagged (%s).',
                 $this->branch,
                 $this->tag
             ));
