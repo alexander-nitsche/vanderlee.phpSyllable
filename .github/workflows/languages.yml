@@ -79,8 +79,6 @@ jobs:
           # debug
           echo "${{ github.ref_name }}"
           echo "$featureBranch"
-          git describe --tags --abbrev=0 ${featureBranch}
-          git describe --tags ${featureBranch}
           git tag --list
 
       - name: Release base branch (if base branch was also previously released)
@@ -97,9 +95,7 @@ jobs:
           echo "${{ github.ref_name }}"
           echo "$featureBranch"
           echo "$featureBranchTag"
-          git describe --tags --abbrev=0 ${featureBranch}
           echo "$featureBranchTagLong"
-          git describe --tags ${featureBranch}
           git tag --list
           
           gh release create ${featureBranchTag} --target ${baseBranch}
