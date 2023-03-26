@@ -1,9 +1,9 @@
 {
     "files": [
         {
-            "_comment": "no changes in languages",
+            "_comment": "new language file",
             "fromUrl": "http://mirror.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-af.tex",
-            "toPath": "../languages/hyph-af.tex"
+            "toPath": "../languages/hyph-argl.tex"
         }
     ]
 }
