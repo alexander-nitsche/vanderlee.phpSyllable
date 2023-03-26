@@ -74,6 +74,13 @@ jobs:
           # git push --tags
           gh pr create --fill --base ${baseBranch}
           gh pr merge --auto --rebase --delete-branch
+          
+          # debug
+          echo "${{ github.ref_name }}"
+          echo "$featureBranch"
+          git describe --tags --abbrev=0 ${featureBranch}
+          git describe --tags ${featureBranch}
+          git tag --list
 
       - name: Release base branch (if base branch was also previously released)
         if: ${{ steps.update-language-files.outputs.CHANGED_LANGUAGES && steps.update-language-files.outputs.RELEASED_BASE_BRANCH == 1 }}
@@ -83,5 +90,15 @@ jobs:
           baseBranch="${{ github.ref_name }}"
           featureBranch="$(git rev-parse --abbrev-ref HEAD)"
           featureBranchTag="$(git describe --tags --abbrev=0 ${featureBranch})"
+          featureBranchTagLong="$(git describe --tags ${featureBranch})"
+          
+          # debug
+          echo "${{ github.ref_name }}"
+          echo "$featureBranch"
+          echo "$featureBranchTag"
+          git describe --tags --abbrev=0 ${featureBranch}
+          echo "$featureBranchTagLong"
+          git describe --tags ${featureBranch}
+          git tag --list
           
           gh release create ${featureBranchTag} --target ${baseBranch}
