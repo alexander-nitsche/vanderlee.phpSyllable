@@ -8,7 +8,15 @@ class ReleaseManager extends Manager
     const MINOR_RELEASE = 1;
     const PATCH_RELEASE = 2;
 
+    /**
+     * @var int
+     */
     protected $releaseType;
+
+    /**
+     * @var bool
+     */
+    protected $withCommit;
 
     protected $branch;
 
@@ -23,6 +31,7 @@ class ReleaseManager extends Manager
         parent::__construct();
 
         $this->releaseType = self::PATCH_RELEASE;
+        $this->withCommit = false;
     }
 
     /**
@@ -31,6 +40,14 @@ class ReleaseManager extends Manager
     public function setReleaseType($releaseType)
     {
         $this->releaseType = $releaseType;
+    }
+
+    /**
+     * @param bool $withCommit
+     */
+    public function setWithCommit($withCommit)
+    {
+        $this->withCommit = $withCommit;
     }
 
     /**
@@ -220,6 +237,10 @@ class ReleaseManager extends Manager
      */
     protected function createCommit()
     {
+        if ($this->withCommit === false) {
+            return;
+        }
+
         $this->exec('git add .');
         $this->exec(sprintf('git commit -m "Release %s"', $this->releaseTag));
         $this->exec(sprintf('git tag %s', $this->releaseTag));

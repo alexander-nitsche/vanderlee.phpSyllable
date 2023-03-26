@@ -6,7 +6,7 @@ class LanguagesDownloadManager extends DownloadManager
 {
     protected function createCommitIfFilesChanged()
     {
-        if ($this->numChanged === 0) {
+        if ($this->withCommit === false || $this->numChanged === 0) {
             return;
         }
 

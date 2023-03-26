@@ -44,7 +44,7 @@ jobs:
         run: |
           baseBranch="${{ github.ref_name }}"
           
-          ./build/update-language-files
+          WITH_COMMIT=1 ./build/update-language-files
           
           echo "CHANGED_LANGUAGES=$(git rev-list ${baseBranch}..HEAD)" >> $GITHUB_OUTPUT
 
@@ -56,7 +56,7 @@ jobs:
           baseBranchTagLong="$(git describe --tags ${baseBranch})"
           
           if [ "${baseBranchTag}" = "${baseBranchTagLong}" ]; then
-            ./build/create-release
+            WITH_COMMIT=1 ./build/create-release
           fi
 
       - name: Merge feature branch into base branch

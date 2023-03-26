@@ -8,15 +8,18 @@ require_once __DIR__.'/../vendor/autoload.php';
 $configurationFile = getenv('CONFIGURATION_FILE');
 $maxRedirects = getenv('MAX_REDIRECTS');
 $logLevel = getenv('LOG_LEVEL');
+$withCommit = getenv('WITH_COMMIT');
 
 $configurationFile = $configurationFile !== false ? $configurationFile : __DIR__.'/update-language-files.json';
 $maxRedirects = $maxRedirects !== false ? (int) $maxRedirects : 1;
 $logLevel = $logLevel !== false ? (int) $logLevel : LOG_INFO;
+$withCommit = $withCommit !== false ? (int) $withCommit === 1 : false;
 
 $downloadManager = new LanguagesDownloadManager();
 $downloadManager->setConfigurationFile($configurationFile);
 $downloadManager->setMaxRedirects($maxRedirects);
 $downloadManager->setLogLevel($logLevel);
+$downloadManager->setWithCommit($withCommit);
 $result = $downloadManager->delegate();
 
 if ($result === false) {

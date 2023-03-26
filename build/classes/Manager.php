@@ -45,12 +45,12 @@ abstract class Manager
     }
 
     /**
-     * @param string $command
-     * @param bool $returnOutput
+     * @param string $command CLI command.
+     * @param bool $returnOutput Return full multiline output instead of first line result?
      *
      * @throws ManagerException
      *
-     * @return array|string
+     * @return array|string First line result or full multiline output.
      *
      */
     protected function exec($command, $returnOutput = false)

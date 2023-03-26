@@ -15,6 +15,11 @@ class DownloadManager extends Manager
     protected $maxRedirects;
 
     /**
+     * @var bool
+     */
+    protected $withCommit;
+
+    /**
      * @var array{'files': <int, array{'_comment': string, 'fromUrl': string, 'toPath': string, 'disabled': boolean}>}
      */
     protected $configuration;
@@ -37,6 +42,7 @@ class DownloadManager extends Manager
 
         $this->configurationFile = 'to-be-set';
         $this->maxRedirects = 1;
+        $this->withCommit = false;
     }
 
     /**
@@ -53,6 +59,14 @@ class DownloadManager extends Manager
     public function setMaxRedirects($maxRedirects)
     {
         $this->maxRedirects = $maxRedirects;
+    }
+
+    /**
+     * @param bool $withCommit
+     */
+    public function setWithCommit($withCommit)
+    {
+        $this->withCommit = $withCommit;
     }
 
     /**
@@ -281,7 +295,7 @@ class DownloadManager extends Manager
 
     protected function createCommitIfFilesChanged()
     {
-        if ($this->numChanged === 0) {
+        if ($this->withCommit === false || $this->numChanged === 0) {
             return;
         }
 

@@ -7,13 +7,16 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 $releaseType = getenv('RELEASE_TYPE');
 $logLevel = getenv('LOG_LEVEL');
+$withCommit = getenv('WITH_COMMIT');
 
 $releaseType = $releaseType !== false ? (int) $releaseType : ReleaseManager::PATCH_RELEASE;
 $logLevel = $logLevel !== false ? (int) $logLevel : LOG_INFO;
+$withCommit = $withCommit !== false ? (int) $withCommit === 1 : false;
 
 $releaseManager = new ReleaseManager();
 $releaseManager->setReleaseType($releaseType);
 $releaseManager->setLogLevel($logLevel);
+$releaseManager->setWithCommit($withCommit);
 $result = $releaseManager->delegate();
 
 if ($result === false) {
