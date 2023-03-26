@@ -41,6 +41,7 @@ jobs:
           git checkout -b "language-update-$(printf '%(%Y-%m-%d-%H-%M-%S)T')"
 
       - name: Commit updated language files
+        id: update-language-files
         run: |
           baseBranch="${{ github.ref_name }}"
           
@@ -49,7 +50,7 @@ jobs:
           echo "CHANGED_LANGUAGES=$(git rev-list ${baseBranch}..HEAD)" >> $GITHUB_OUTPUT
 
       - name: Commit patch release (if base branch was released too)
-        if: ${{ steps.context.outputs.CHANGED_LANGUAGES }}
+        if: ${{ steps.update-language-files.outputs.CHANGED_LANGUAGES }}
         run: |
           baseBranch="${{ github.ref_name }}"
           baseBranchTag="$(git describe --tags --abbrev=0 ${baseBranch})"
@@ -60,7 +61,7 @@ jobs:
           fi
 
       - name: Merge feature branch into base branch
-        if: ${{ steps.context.outputs.CHANGED_LANGUAGES }}
+        if: ${{ steps.update-language-files.outputs.CHANGED_LANGUAGES }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
