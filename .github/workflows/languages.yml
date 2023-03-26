@@ -3,6 +3,7 @@ name: Languages
 on:
   # Run manually on demand.
   workflow_dispatch:
+  push:
   # Run automatically on the first day of the month at midnight.
   schedule:
     - cron: '0 0 1 * *'
