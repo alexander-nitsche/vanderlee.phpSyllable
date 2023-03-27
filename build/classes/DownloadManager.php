@@ -20,6 +20,16 @@ class DownloadManager extends Manager
     protected $withCommit;
 
     /**
+     * @var Git
+     */
+    protected $git;
+
+    /**
+     * @var Console
+     */
+    protected $console;
+
+    /**
      * @var array{'files': <int, array{'_comment': string, 'fromUrl': string, 'toPath': string, 'disabled': boolean}>}
      */
     protected $configuration;
@@ -43,6 +53,9 @@ class DownloadManager extends Manager
         $this->configurationFile = 'to-be-set';
         $this->maxRedirects = 1;
         $this->withCommit = false;
+
+        $this->git = new Git();
+        $this->console = new Console();
     }
 
     /**
@@ -67,6 +80,22 @@ class DownloadManager extends Manager
     public function setWithCommit($withCommit)
     {
         $this->withCommit = $withCommit;
+    }
+
+    /**
+     * @param Git $git
+     */
+    public function setGit($git)
+    {
+        $this->git = $git;
+    }
+
+    /**
+     * @param Console $console
+     */
+    public function setConsole($console)
+    {
+        $this->console = $console;
     }
 
     /**
@@ -96,7 +125,7 @@ class DownloadManager extends Manager
      */
     protected function checkPrerequisites()
     {
-        if ($this->withCommit && !$this->hasCleanWorkingTree()) {
+        if ($this->withCommit && !$this->git->hasCleanWorkingTree()) {
             throw new ManagerException(
                 'The project has uncommitted changes.'
             );
@@ -290,7 +319,8 @@ class DownloadManager extends Manager
 
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        if ($fileContent === '' || $status < 200 || $status >= 300) {
+        // Allow status code '0' for retrieving local files in tests.
+        if ($fileContent === '' || $status > 0 && ($status < 200 || $status >= 300)) {
             throw new ManagerException(sprintf(
                 "Call to URL %s failed with\n%s",
                 $fileUrl,
@@ -306,6 +336,11 @@ class DownloadManager extends Manager
         return $fileContent;
     }
 
+    /**
+     * @throws ManagerException
+     *
+     * @return void
+     */
     protected function createCommitIfFilesChanged()
     {
         if ($this->withCommit === false || $this->numChanged === 0) {
@@ -317,7 +352,7 @@ class DownloadManager extends Manager
             $message = sprintf('Automatic update of %s', basename($this->filesChanged[0]));
         }
 
-        $this->exec('git add .');
-        $this->exec(sprintf('git commit -m "%s"', $message));
+        $this->console->exec('git add .');
+        $this->console->exec(sprintf('git commit -m "%s"', $message));
     }
 }

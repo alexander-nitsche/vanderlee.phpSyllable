@@ -14,13 +14,31 @@ class ReleaseManager extends Manager
      */
     protected $withCommit;
 
+    /**
+     * @var string
+     */
+    protected $readmeFile;
+
+    /**
+     * @var Git
+     */
+    protected $git;
+
+    /**
+     * @var Console
+     */
+    protected $console;
+
+    /**
+     * @var SemanticVersioning
+     */
+    protected $semanticVersioning;
+
     protected $branch;
 
     protected $tag;
 
     protected $releaseTag;
-
-    protected $semanticVersioning;
 
     public function __construct()
     {
@@ -28,7 +46,10 @@ class ReleaseManager extends Manager
 
         $this->releaseType = SemanticVersioning::PATCH_RELEASE;
         $this->withCommit = false;
+        $this->readmeFile = __DIR__.'/../../README.md';
 
+        $this->git = new Git();
+        $this->console = new Console();
         $this->semanticVersioning = new SemanticVersioning();
     }
 
@@ -46,6 +67,38 @@ class ReleaseManager extends Manager
     public function setWithCommit($withCommit)
     {
         $this->withCommit = $withCommit;
+    }
+
+    /**
+     * @param string $readmeFile
+     */
+    public function setReadmeFile($readmeFile)
+    {
+        $this->readmeFile = $readmeFile;
+    }
+
+    /**
+     * @param Git $git
+     */
+    public function setGit($git)
+    {
+        $this->git = $git;
+    }
+
+    /**
+     * @param Console $console
+     */
+    public function setConsole($console)
+    {
+        $this->console = $console;
+    }
+
+    /**
+     * @param SemanticVersioning $semanticVersioning
+     */
+    public function setSemanticVersioning($semanticVersioning)
+    {
+        $this->semanticVersioning = $semanticVersioning;
     }
 
     /**
@@ -77,8 +130,8 @@ class ReleaseManager extends Manager
      */
     protected function getContext()
     {
-        $this->branch = $this->getBranch();
-        $this->tag = $this->getTag();
+        $this->branch = $this->git->getBranch();
+        $this->tag = $this->git->getTag();
         $this->releaseTag = $this->semanticVersioning->getNextReleaseTag($this->tag, $this->releaseType);
     }
 
@@ -89,15 +142,15 @@ class ReleaseManager extends Manager
      */
     protected function checkPrerequisites()
     {
-        if ($this->withCommit && !$this->hasCleanWorkingTree()) {
+        if ($this->withCommit && !$this->git->hasCleanWorkingTree()) {
             throw new ManagerException(
                 'The project has uncommitted changes.'
             );
         }
 
-        if ($this->isBranchHeadTagged()) {
+        if ($this->git->isBranchReleased()) {
             throw new ManagerException(sprintf(
-                'Current branch (%s) is already tagged (%s).',
+                'Current branch (%s) is already released (%s).',
                 $this->branch,
                 $this->tag
             ));
@@ -111,18 +164,14 @@ class ReleaseManager extends Manager
      */
     protected function updateReadme()
     {
-        $subjects = $this->exec(
-            sprintf('git log --no-merges --pretty="format:%%s" %s..HEAD', $this->tag),
-            true
-        );
+        $subjects = $this->git->getSubjectsSinceLastRelease();
 
         $changelog = "$this->releaseTag\n";
         foreach ($subjects as $subject) {
             $changelog .= "-   $subject\n";
         }
 
-        $readmePath = __DIR__.'/../../README.md';
-        $readme = file($readmePath);
+        $readme = file($this->readmeFile);
         $readmeContent = '';
         foreach ($readme as $line) {
             if (strpos($line, "Version $this->tag") === 0) {
@@ -133,7 +182,7 @@ class ReleaseManager extends Manager
                 $readmeContent .= $line;
             }
         }
-        file_put_contents($readmePath, $readmeContent);
+        file_put_contents($this->readmeFile, $readmeContent);
     }
 
     /**
@@ -143,7 +192,7 @@ class ReleaseManager extends Manager
      */
     protected function checkPostConditions()
     {
-        if ($this->hasCleanWorkingTree()) {
+        if ($this->git->hasCleanWorkingTree()) {
             throw new ManagerException(
                 'Could not update README.md. The format has probably changed.'
             );
@@ -161,8 +210,8 @@ class ReleaseManager extends Manager
             return;
         }
 
-        $this->exec('git add .');
-        $this->exec(sprintf('git commit -m "Release %s"', $this->releaseTag));
-        $this->exec(sprintf('git tag %s', $this->releaseTag));
+        $this->console->exec('git add .');
+        $this->console->exec(sprintf('git commit -m "Release %s"', $this->releaseTag));
+        $this->console->exec(sprintf('git tag %s', $this->releaseTag));
     }
 }
