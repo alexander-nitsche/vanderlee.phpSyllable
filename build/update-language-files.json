@@ -3,6 +3,14 @@
         {
             "fromUrl": "http://mirror.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-af.tex",
             "toPath": "../languages/hyph-af.tex"
+        },
+        {
+            "fromUrl": "http://mirror.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-as.tex",
+            "toPath": "../languages/hyph-as.tex"
+        },
+        {
+            "fromUrl": "http://mirror.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-bg.tex",
+            "toPath": "../languages/hyph-bg.tex"
         }
     ]
 }
