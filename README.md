@@ -1,6 +1,6 @@
 Syllable
 ========
-Version 1.5.4
+Version 1.5.5
 
 [![Tests](https://github.com/vanderlee/phpSyllable/actions/workflows/tests.yml/badge.svg)](https://github.com/vanderlee/phpSyllable/actions/workflows/tests.yml)
 
@@ -246,6 +246,9 @@ to execute the tests.
 
 Changes
 -------
+1.5.5
+-   Automatic update of 74 languages
+
 1.5.4
 -   Fixed PHP 7.4 compatibility (#37) by @Dargmuesli.
 
