@@ -6,6 +6,10 @@ on:
   # Run automatically on the first day of the month at midnight.
   schedule:
     - cron: '0 0 1 * *'
+  push:
+    # Avoid a double run for tagged commits.
+    branches:
+      - '*'
 
 jobs:
   update:
